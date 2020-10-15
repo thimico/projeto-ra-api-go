@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+    api:
+        build: .
+        container_name: ra_api
+        ports:
+            - "8080:8080"
+        environment:
+            DATABASE_URL: mongodb://mongo:27017/
+            DATABASE_NAME: ra-db
+            PORT: 8080
+        networks:
+            - product-network
+        depends_on:
+            - mongo
+    mongo:
+        image: mongo
+        container_name: mg-ra
+        environment:
+            MONGO_INITDB_ROOT: 
+            MONGO_INITDB_PASSWORD: 
+            MONGO_INITDB_DATABASE: ra-db
+               
+        networks:
+            - product-network
+
+networks:
+    product-network:
+        driver:  "bridge"
+
+
+  
+

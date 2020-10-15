@@ -1,0 +1,6 @@
+database:
+  psn: mongodb://localhost:27017/
+  db:  ra-api
+
+server:
+  port: :8080

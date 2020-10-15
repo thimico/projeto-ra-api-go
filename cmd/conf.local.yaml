@@ -1,0 +1,6 @@
+database:
+  psn: ${DATABASE_URL}
+  db:  ${DATABASE_NAME}
+
+server:
+  port: :${PORT}

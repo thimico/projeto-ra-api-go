@@ -1,0 +1,60 @@
+version: "2"
+services:
+  nginx:
+    build: ./k8s/nginx
+    links:
+      - app1:app1
+      - app2:app2
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/nginx/ssl:/etc/nginx/ssl
+    environment:
+      - DOMAIN_NAME=ra-challenge.com
+  app1:
+    container_name: ra_api_1
+    restart: always
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    links:
+      - mongo
+      - redis
+    environment:
+      - MODE=prod
+      - REGION=us-west-1
+      - DATABASE_URL=mongodb://mongo:27017/
+      - DATABASE_NAME=ra-db
+      - PORT=8080
+  app2:
+    container_name: ra_api_2
+    restart: always
+    build: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    links:
+      - mongo
+      - redis
+    environment:
+      - MODE=prod
+      - REGION=us-west-2
+      - DATABASE_URL=mongodb://mongo:27017/
+      - DATABASE_NAME=ra-db
+      - PORT=8081
+  mongo:
+    image: mongo
+    container_name: mg-ra
+    environment:
+      MONGO_INITDB_ROOT:
+      MONGO_INITDB_PASSWORD:
+      MONGO_INITDB_DATABASE: ra-db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379"
