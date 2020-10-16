@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"projeto-ra-api-go/pkg/api/model"
 	"sync"
 
@@ -20,7 +19,7 @@ type Complain interface {
 }
 
 type ComplainRepository interface {
-	Save(parentContext context.Context, complain *model.Complain) (string, error)
+	Save(parentContext context.Context, complain *model.Complain) (*model.Complain, error)
 	DeleteById(ctx context.Context, id string) error
 	Update(ctx context.Context, p *model.Complain, id string) error
 	FindById(ctx context.Context, id string) (*model.Complain, error)
@@ -37,13 +36,15 @@ func NewComplain(complains ComplainRepository, extapi ReclameAquiApiInterface) C
 }
 
 func (s *complain) Save(ctx context.Context, in *model.ComplainIn) (*model.ComplainOut, error) {
+	var complainOut *model.ComplainOut
 	complainModel := in.ToComplain()
-	HexID, err := s.repository.Save(ctx, complainModel)
-
+	complain, err := s.repository.Save(ctx, complainModel)
 	if err != nil {
 		return nil, err
 	}
-	complainOut, err := s.FindById(ctx, HexID)
+	if complain != nil {
+		complainOut = complain.ToComplainOut()
+	}
 
 	return complainOut, nil
 }
@@ -178,7 +179,6 @@ func (s *complain) FindByParam_exemplo2(ctx context.Context, param *model.Compla
 			defer wg.Done()
 			appearances, err := s.externalRA.CountPageViewsRaExternalApi(ctx, complain.Company.Title)
 			if err != nil {
-				log.Fatalf("Error on calling external api: ", err)
 				return err
 			}
 			complain.CountPageViews = appearances

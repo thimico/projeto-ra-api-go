@@ -140,11 +140,11 @@ func TestComplain_ToDocument(t *testing.T) {
 				ID:      id,
 				Title:    "Terra",
 				Description: "frio",
-				Locale: Locale{
+				Locale: document.Locale{
 					City: "arid",
 					State: "Bahia",
 				},
-				Company: Company{
+				Company: document.Company{
 					Title: "Company 1",
 					Description: "Description 1",
 				},

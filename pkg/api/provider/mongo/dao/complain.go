@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"fmt"
 	"projeto-ra-api-go/pkg/api/model"
 	"projeto-ra-api-go/pkg/api/provider/mongo/document"
 	"time"
@@ -21,7 +22,10 @@ func NewMongoComplain(client *mongo.Client, db *mongo.Database) *Complain { //re
 	return &Complain{client: client, collection: db.Collection("complain")}
 }
 
-func (p *Complain) Save(parentContext context.Context, complain *model.Complain) (string, error) {
+func (p *Complain) Save(parentContext context.Context, complain *model.Complain) (*model.Complain, error) {
+	if complain == nil {
+		return nil, fmt.Errorf("Error on parsing")
+	}
 	locale := document.Locale{
 		City:  complain.Locale.City,
 		State: complain.Locale.State,
@@ -39,11 +43,22 @@ func (p *Complain) Save(parentContext context.Context, complain *model.Complain)
 
 	one, err := p.collection.InsertOne(parentContext, doc)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	inserted := one.InsertedID.(primitive.ObjectID)
-	return inserted.Hex(), nil
+	if one == nil {
+		return nil, err
+	}
+
+	result := p.collection.FindOne(parentContext, bson.M{"_id": one.InsertedID.(primitive.ObjectID).String()})
+
+	var docOut document.Complain
+	err = result.Decode(&docOut)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToComplain(docOut), nil
 }
 
 func (p *Complain) DeleteById(ctx context.Context, id string) error {

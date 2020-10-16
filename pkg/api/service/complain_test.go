@@ -13,8 +13,9 @@ import (
 )
 
 func Test_complain_Save(t *testing.T) {
+	idd := primitive.NewObjectID()
 	type fields struct {
-		dao   *mocks.ComplainRepository
+		dao    *mocks.ComplainRepository
 		extapi ReclameAquiApiInterface
 	}
 	type args struct {
@@ -25,14 +26,14 @@ func Test_complain_Save(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    string
+		want    *model.ComplainOut
 		wantErr bool
 		mock    func(repository *mocks.ComplainRepository)
 	}{
 		{
 			name: "save sucess",
 			fields: fields{
-				dao:   new(mocks.ComplainRepository),
+				dao:    new(mocks.ComplainRepository),
 				extapi: NewReclameAquiExternalApi(),
 			},
 			args: args{
@@ -50,16 +51,42 @@ func Test_complain_Save(t *testing.T) {
 					},
 				},
 			},
-			want:    mock.Anything,
+			want:    &model.ComplainOut{
+			ID:          idd ,
+			Title:       mock.Anything,
+			Description: mock.Anything,
+			Locale: model.Locale{
+			City:  mock.Anything,
+			State: mock.Anything,
+			},
+				Company: model.Company{
+				Title:       mock.Anything,
+				Description: mock.Anything,
+			},
+				CountPageViews: 0,
+				IsOnTop10BadRA: false,
+			},
 			wantErr: false,
 			mock: func(repository *mocks.ComplainRepository) {
-				repository.On("Save", mock.Anything, mock.Anything).Return(mock.Anything, nil).Once()
+				repository.On("Save", mock.Anything, mock.Anything).Return(&model.Complain{
+					ID:      idd,
+					Title:       mock.Anything,
+					Description: mock.Anything,
+					Locale: model.Locale{
+						City:  mock.Anything,
+						State: mock.Anything,
+					},
+					Company: model.Company{
+						Title:       mock.Anything,
+						Description: mock.Anything,
+					},
+				}, nil).Once()
 			},
 		},
 		{
 			name: "save error",
 			fields: fields{
-				dao:   new(mocks.ComplainRepository),
+				dao:    new(mocks.ComplainRepository),
 				extapi: NewReclameAquiExternalApi(),
 			},
 			args: args{
@@ -77,16 +104,16 @@ func Test_complain_Save(t *testing.T) {
 					},
 				},
 			},
-			want:    "",
+			want:    nil,
 			wantErr: true,
 			mock: func(repository *mocks.ComplainRepository) {
-				repository.On("Save", mock.Anything, mock.Anything).Return("", errors.New("error to save"))
+				repository.On("Save", mock.Anything, mock.Anything).Return(nil, errors.New("error to save"))
 			},
 		},
 		{
 			name: "save error2",
 			fields: fields{
-				dao:   new(mocks.ComplainRepository),
+				dao:    new(mocks.ComplainRepository),
 				extapi: NewReclameAquiExternalApi(),
 			},
 			args: args{
@@ -104,10 +131,10 @@ func Test_complain_Save(t *testing.T) {
 					},
 				},
 			},
-			want:    "",
+			want:    nil,
 			wantErr: true,
 			mock: func(repository *mocks.ComplainRepository) {
-				repository.On("Save", mock.Anything, mock.Anything).Return("", errors.New("error to save"))
+				repository.On("Save", mock.Anything, mock.Anything).Return(nil, errors.New("error to save"))
 			},
 		},
 	}
@@ -123,7 +150,7 @@ func Test_complain_Save(t *testing.T) {
 				t.Errorf("Save() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if got != tt.want {
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Save() got = %v, want %v", got, tt.want)
 			}
 			tt.fields.dao.AssertExpectations(t)
@@ -216,6 +243,7 @@ func Test_complain_FindById(t *testing.T) {
 					Description: mock.Anything,
 				},
 				CountPageViews: 0,
+				IsOnTop10BadRA: false,
 			},
 			wantErr: false,
 			mock: func(repository *mocks.ComplainRepository) {
@@ -406,6 +434,7 @@ func Test_complain_FindByParam(t *testing.T) {
 						Description: mock.Anything,
 					},
 					CountPageViews: 0,
+					IsOnTop10BadRA: false,
 				},
 				model.ComplainOut{
 					ID:                          id,
@@ -420,6 +449,7 @@ func Test_complain_FindByParam(t *testing.T) {
 						Description: mock.Anything,
 					},
 					CountPageViews: 0,
+					IsOnTop10BadRA: false,
 				},
 			},
 			wantErr: false,
@@ -542,6 +572,7 @@ func Test_complain_FindByParam_of_arguments(t *testing.T) {
 						Description: mock.Anything,
 					},
 					CountPageViews: 0,
+					IsOnTop10BadRA: false,
 				},
 				model.ComplainOut{
 					ID:                          id,
@@ -556,6 +587,7 @@ func Test_complain_FindByParam_of_arguments(t *testing.T) {
 						Description: mock.Anything,
 					},
 					CountPageViews: 0,
+					IsOnTop10BadRA: false,
 				},
 			},
 			wantErr: false,
@@ -586,70 +618,6 @@ func Test_complain_FindByParam_of_arguments(t *testing.T) {
 						Company: model.Company{
 							Title:       mock.Anything,
 							Description: mock.Anything,
-						},
-					},
-				}, nil).Once()
-			},
-		},
-		{
-			name: "findByParam success 2",
-			fields: fields{
-				dao:   new(mocks.ComplainRepository),
-				extapi: NewReclameAquiExternalApi(),
-			},
-			args: args{
-				ctx: context.Background(),
-				plan: &model.ComplainIn{
-					Title:       "Reclamacao sobre fatura",
-					Description: "Recebi fatura inválida",
-					Locale:      model.Locale{},
-					Company:     model.Company{},
-				},
-			},
-			want: []model.ComplainOut{
-
-				model.ComplainOut{
-					ID:                          id,
-					Title:                        mock.Anything,
-					Description:                  mock.Anything,
-					Locale:                      model.Locale{
-						City:   mock.Anything,
-						State:  mock.Anything,
-					},
-					Company:                     model.Company{
-						Title:        mock.Anything,
-						Description:  mock.Anything,
-					},
-					CountPageViews: 0,
-				},
-			},
-			wantErr: false,
-			mock: func(repository *mocks.ComplainRepository) {
-				repository.On("FindByParam", mock.Anything, mock.Anything).Return([]model.Complain{
-					model.Complain{
-						ID:          id,
-						Title:        mock.Anything,
-						Description:  mock.Anything,
-						Locale:      model.Locale{
-							City:   mock.Anything,
-							State:  mock.Anything,
-						},
-						Company:     model.Company{
-							Title:        mock.Anything,
-							Description:  mock.Anything,
-						},
-					},
-					model.Complain{
-						ID:          id,
-						Title:        mock.Anything,
-						Description:  mock.Anything,
-						Locale:      model.Locale{
-							City:   mock.Anything,
-							State:  mock.Anything,
-						},
-						Company:     model.Company{
-							Title:        mock.Anything,
-							Description:  mock.Anything,
 						},
 					},
 				}, nil).Once()

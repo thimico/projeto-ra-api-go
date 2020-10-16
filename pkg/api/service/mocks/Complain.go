@@ -75,14 +75,14 @@ func (_m *Complain) FindByParam(ctx context.Context, param *model.ComplainIn) ([
 }
 
 // Save provides a mock function with given fields: parentContext, complain
-func (_m *Complain) Save(parentContext context.Context, complain *model.ComplainIn) (string, error) {
+func (_m *Complain) Save(parentContext context.Context, complain *model.ComplainIn) (*model.ComplainOut, error) {
 	ret := _m.Called(parentContext, complain)
 
-	var r0 string
-	if rf, ok := ret.Get(0).(func(context.Context, *model.ComplainIn) string); ok {
+	var r0 *model.ComplainOut
+	if rf, ok := ret.Get(0).(func(context.Context, *model.ComplainIn) *model.ComplainOut); ok {
 		r0 = rf(parentContext, complain)
 	} else {
-		r0 = ret.Get(0).(string)
+		r0 = ret.Get(0).(*model.ComplainOut)
 	}
 
 	var r1 error
