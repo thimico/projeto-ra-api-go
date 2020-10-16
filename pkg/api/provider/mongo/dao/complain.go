@@ -46,11 +46,7 @@ func (p *Complain) Save(parentContext context.Context, complain *model.Complain)
 		return nil, err
 	}
 
-	if one == nil {
-		return nil, err
-	}
-
-	result := p.collection.FindOne(parentContext, bson.M{"_id": one.InsertedID.(primitive.ObjectID).String()})
+	result := p.collection.FindOne(parentContext, bson.M{"_id": one.InsertedID.(primitive.ObjectID)})
 
 	var docOut document.Complain
 	err = result.Decode(&docOut)
