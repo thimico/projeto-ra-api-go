@@ -18,7 +18,7 @@ import (
 )
 
 func TestComplainController_SaveComplain(t *testing.T) {
-
+	idd := primitive.NewObjectID()
 	type fields struct {
 		service *mocks.Complain
 	}
@@ -52,10 +52,10 @@ func TestComplainController_SaveComplain(t *testing.T) {
 			  }
 			}`),
 			},
-			wantHttpStatusCode: http.StatusCreated,
+			wantHttpStatusCode: http.StatusOK,
 			mock: func(fs *mocks.Complain) {
 				fs.On("Save", mock.Anything, mock.Anything).Return(&model.ComplainOut{
-					ID:             primitive.ObjectID{},
+					ID:             idd,
 					Title:          mock.Anything,
 					Description:    mock.Anything,
 					Locale: model.Locale{
