@@ -186,15 +186,18 @@ func (p *ComplainCtrlImpl) FindByParam(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 
-	result := make([]model.ComplainOut, len(complains))
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	encoder := json.NewEncoder(w)
-	encoder.Encode(&result)
+	if complains == nil {
+		result := make([]model.ComplainOut, len(complains))
+		encoder.Encode(&result)
+	} else {
+		encoder.Encode(&complains)
+	}
 
 	w.WriteHeader(http.StatusOK)
 	return
