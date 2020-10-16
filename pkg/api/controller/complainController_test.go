@@ -5,8 +5,8 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"projeto-ra-api-go/pkg/api/controller/mocks"
 	"projeto-ra-api-go/pkg/api/model"
-	"projeto-ra-api-go/pkg/api/service/mocks"
 	"strings"
 	"testing"
 
@@ -459,6 +459,7 @@ func TestComplainController_FindByParam(t *testing.T) {
 							Description: mock.Anything,
 						},
 						CountPageViews: 0,
+						IsOnTop10BadRA: false,
 					},
 				}, nil).Once()
 			}},

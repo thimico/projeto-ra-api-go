@@ -3,7 +3,7 @@ package controller
 import (
 	"net/http"
 	"net/http/httptest"
-	mocks2 "projeto-ra-api-go/pkg/api/controller/mocks"
+	"projeto-ra-api-go/pkg/api/controller/mocks"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,22 +13,22 @@ import (
 
 func TestHealthHandler_Healthcheck(t *testing.T) {
 	type fields struct {
-		service *mocks2.HealthChecker
+		service *mocks.HealthChecker
 	}
 
 	tests := []struct {
 		name               string
 		fields             fields
 		wantHttpStatusCode int
-		mock               func(fs *mocks2.HealthChecker)
+		mock               func(fs *mocks.HealthChecker)
 	}{
 		{name: "sucesss",
 			fields: fields{
-				service: new(mocks2.HealthChecker),
+				service: new(mocks.HealthChecker),
 			},
 
 			wantHttpStatusCode: http.StatusOK,
-			mock: func(fs *mocks2.HealthChecker) {
+			mock: func(fs *mocks.HealthChecker) {
 				fs.On("Check", mock.Anything, mock.Anything).Return(nil)
 
 			}},
