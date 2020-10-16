@@ -152,7 +152,7 @@ func (p *ComplainCtrlImpl) DeleteById(w http.ResponseWriter, r *http.Request) {
 // @Tags complains
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} model.ComplainOut
+// @Success 201 {array} model.ComplainOut
 // @Router /complains [get]
 func (p *ComplainCtrlImpl) FindByParam(w http.ResponseWriter, r *http.Request) {
 	var companyTitle, complainCity string

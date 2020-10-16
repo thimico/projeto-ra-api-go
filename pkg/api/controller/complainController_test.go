@@ -40,21 +40,35 @@ func TestComplainController_SaveComplain(t *testing.T) {
 			},
 			args: args{
 				body: strings.NewReader(`{
-				  "title": "Nenhuma atenção com o cliente",
-				  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-				  "locale": {
-						"city":"Salvador",
-						"state":"BA"
-				  },
-				  "company": {
-					  	"name": "Enterprise90",
-						"description": "Enterprise Developer 90 based"
-				  }
+			  "title": "Nenhuma atenção com o cliente",
+			  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+			  "locale": {
+				"city": "Rio de Janeiro",
+				"state": "Rio de Janeiro"
+			  },
+			  "company": {
+				"title": "Magazine Luiza",
+				"description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+			  }
 			}`),
 			},
 			wantHttpStatusCode: http.StatusCreated,
 			mock: func(fs *mocks.Complain) {
-				fs.On("Save", mock.Anything, mock.Anything).Return(mock.Anything, nil).Once()
+				fs.On("Save", mock.Anything, mock.Anything).Return(&model.ComplainOut{
+					ID:             primitive.ObjectID{},
+					Title:          mock.Anything,
+					Description:    mock.Anything,
+					Locale: model.Locale{
+						City:  mock.Anything,
+						State: mock.Anything,
+					},
+					Company: model.Company{
+						Title:       mock.Anything,
+						Description: mock.Anything,
+					},
+					CountPageViews: 0,
+					IsOnTop10BadRA: false,
+				}, nil).Once()
 			},
 		},
 		{
@@ -176,7 +190,7 @@ func TestComplainController_DeleteById(t *testing.T) {
 }
 
 func TestComplainController_GetAll(t *testing.T) {
-	var complains []model.ComplainOut
+	id := primitive.NewObjectID()
 	type fields struct {
 		service *mocks.Complain
 	}
@@ -194,7 +208,38 @@ func TestComplainController_GetAll(t *testing.T) {
 			},
 			wantHttpStatusCode: http.StatusOK,
 			mock: func(fs *mocks.Complain) {
-				fs.On("FindByParam", mock.Anything, mock.Anything).Return(complains, nil).Once()
+				fs.On("FindByParamWithExternal", mock.Anything, mock.Anything).Return([]model.ComplainOut{
+
+					model.ComplainOut{
+						ID:                          id,
+						Title:       mock.Anything,
+						Description: mock.Anything,
+						Locale: model.Locale{
+							City:  mock.Anything,
+							State: mock.Anything,
+						},
+						Company: model.Company{
+							Title:       mock.Anything,
+							Description: mock.Anything,
+						},
+						CountPageViews: 0,
+						IsOnTop10BadRA: false,
+					},
+					model.ComplainOut{
+						ID:                          id,
+						Title:       mock.Anything,
+						Description: mock.Anything,
+						Locale: model.Locale{
+							City:  mock.Anything,
+							State: mock.Anything,
+						},
+						Company: model.Company{
+							Title:       mock.Anything,
+							Description: mock.Anything,
+						},
+						CountPageViews: 0,
+						IsOnTop10BadRA: false,
+					}}, nil).Once()
 			}},
 		{name: "return 500 server error",
 			fields: fields{
@@ -203,7 +248,7 @@ func TestComplainController_GetAll(t *testing.T) {
 
 			wantHttpStatusCode: http.StatusInternalServerError,
 			mock: func(fs *mocks.Complain) {
-				fs.On("FindByParam", mock.Anything, mock.Anything).Return(nil, errors.New("server error")).Once()
+				fs.On("FindByParamWithExternal", mock.Anything, mock.Anything).Return(nil, errors.New("server error")).Once()
 			}},
 	}
 	for _, tt := range tests {
@@ -243,7 +288,7 @@ func TestComplainController_GetAll2(t *testing.T) {
 			},
 			wantHttpStatusCode: http.StatusOK,
 			mock: func(fs *mocks.Complain) {
-				fs.On("FindByParam", mock.Anything, mock.Anything).Return(complains, nil).Once()
+				fs.On("FindByParamWithExternal", mock.Anything, mock.Anything).Return(complains, nil).Once()
 			}},
 	}
 	for _, tt := range tests {
@@ -388,7 +433,7 @@ func TestComplainController_FindById(t *testing.T) {
 			},
 			wantHttpStatusCode: http.StatusOK,
 			mock: func(fs *mocks.Complain) {
-				fs.On("FindById", mock.Anything, mock.Anything).Return(complain, nil).Once()
+				fs.On("FindByIdWithExternal", mock.Anything, mock.Anything).Return(complain, nil).Once()
 			}},
 		{name: "return 404 not found",
 			fields: fields{
@@ -399,7 +444,7 @@ func TestComplainController_FindById(t *testing.T) {
 			},
 			wantHttpStatusCode: http.StatusNotFound,
 			mock: func(fs *mocks.Complain) {
-				fs.On("FindById", mock.Anything, mock.Anything).Return(nil, errors.New("not found ")).Once()
+				fs.On("FindByIdWithExternal", mock.Anything, mock.Anything).Return(nil, errors.New("not found ")).Once()
 			}},
 	}
 	for _, tt := range tests {
@@ -445,7 +490,7 @@ func TestComplainController_FindByParam(t *testing.T) {
 			},
 			wantHttpStatusCode: http.StatusOK,
 			mock: func(fs *mocks.Complain) {
-				fs.On("FindByParam", mock.Anything, complain).Return([]model.ComplainOut{
+				fs.On("FindByParamWithExternal", mock.Anything, complain).Return([]model.ComplainOut{
 					model.ComplainOut{
 						ID:          primitive.NewObjectID(),
 						Title:       mock.Anything,
